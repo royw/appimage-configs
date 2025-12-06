@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/royw/appimage-configs/schemas/app-config.schema.json",
+  "title": "AppImage App Configuration",
+  "description": "Configuration file for an AppImage application managed by appimage-updater",
+  "type": "object",
+  "required": ["applications"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema for IDE validation"
+    },
+    "applications": {
+      "type": "array",
+      "description": "List of application configurations (typically one per file)",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/application"
+      }
+    }
+  },
+  "definitions": {
+    "application": {
+      "type": "object",
+      "description": "Configuration for a single AppImage application",
+      "required": ["name", "url", "download_dir", "pattern"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Application name (case-sensitive, should match filename)",
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "source_type": {
+          "type": "string",
+          "description": "Repository source type",
+          "enum": ["github", "gitlab", "sourceforge", "direct", "direct_download", "dynamic_download"]
+        },
+        "url": {
+          "type": "string",
+          "description": "Repository URL",
+          "format": "uri",
+          "pattern": "^https?://"
+        },
+        "download_dir": {
+          "type": "string",
+          "description": "Download directory (relative path, resolved against global config)",
+          "pattern": "^[^/~]"
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Regex pattern to match AppImage assets in releases"
+        },
+        "version_pattern": {
+          "type": ["string", "null"],
+          "description": "Regex pattern to extract version from filename"
+        },
+        "basename": {
+          "type": ["string", "null"],
+          "description": "Override base filename for downloaded AppImage"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether this app is enabled for updates",
+          "default": true
+        },
+        "prerelease": {
+          "type": "boolean",
+          "description": "Include prerelease/nightly builds",
+          "default": false
+        },
+        "checksum": {
+          "$ref": "#/definitions/checksum"
+        },
+        "rotation_enabled": {
+          "type": "boolean",
+          "description": "Enable version rotation (keep old versions)",
+          "default": false
+        },
+        "symlink_path": {
+          "type": ["string", "null"],
+          "description": "Symlink path (relative, resolved against global symlink_dir)"
+        },
+        "retain_count": {
+          "type": "integer",
+          "description": "Number of old versions to keep when rotation is enabled",
+          "minimum": 0,
+          "default": 3
+        }
+      },
+      "additionalProperties": false
+    },
+    "checksum": {
+      "type": "object",
+      "description": "Checksum verification configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enable checksum verification",
+          "default": false
+        },
+        "pattern": {
+          "type": "string",
+          "description": "Pattern for checksum file name, use {filename} placeholder"
+        },
+        "algorithm": {
+          "type": "string",
+          "description": "Hash algorithm",
+          "enum": ["sha256", "sha512", "md5"]
+        },
+        "required": {
+          "type": "boolean",
+          "description": "Fail if checksum file not found",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
