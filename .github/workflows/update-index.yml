@@ -1,16 +1,17 @@
-name: Update Index
+name: Build and Release Configs
 
 on:
   push:
     paths:
       - 'configs/*.json'
+      - 'schemas/*.json'
     branches:
       - master
       - main
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
-  update-index:
+  build-release:
     runs-on: ubuntu-latest
     
     permissions:
@@ -30,23 +31,37 @@ jobs:
       - name: Install dependencies
         run: pip install jsonschema
       
-      - name: Run update_index.py
+      - name: Generate index.json
         run: python scripts/update_index.py
       
-      - name: Check for changes
-        id: changes
+      - name: Set release variables
+        id: vars
         run: |
-          if git diff --quiet index.json; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
+          TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "tag=v$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "asset_name=appimage-configs-$TIMESTAMP.tar.gz" >> $GITHUB_OUTPUT
       
-      - name: Commit and push
-        if: steps.changes.outputs.changed == 'true'
+      - name: Create tarball
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.json
-          git commit -m "chore: update index.json [skip ci]"
-          git push
+          tar -czvf ${{ steps.vars.outputs.asset_name }} \
+            index.json \
+            configs/ \
+            schemas/
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: "Configs ${{ steps.vars.outputs.timestamp }}"
+          body: |
+            Automated release of appimage-configs.
+            
+            **Asset:** `${{ steps.vars.outputs.asset_name }}`
+            
+            Contains:
+            - `index.json` - App index with hashes
+            - `configs/` - All app configuration files
+            - `schemas/` - JSON schemas for validation
+          files: ${{ steps.vars.outputs.asset_name }}
+          make_latest: true
