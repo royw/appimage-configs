@@ -15,10 +15,7 @@
         "pattern": "{filename}-SHA256.txt",
         "algorithm": "sha256",
         "required": false
-      },
-      "rotation_enabled": true,
-      "symlink_path": "FreeCAD_weekly/FreeCAD_weekly-2025.12.03-Linux-x86_64-py311.AppImage.current",
-      "retain_count": 3
+      }
     }
   ]
 }

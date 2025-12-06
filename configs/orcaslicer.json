@@ -15,10 +15,7 @@
         "pattern": "{filename}-SHA256.txt",
         "algorithm": "sha256",
         "required": false
-      },
-      "rotation_enabled": true,
-      "symlink_path": "OrcaSlicer/OrcaSlicer_Linux_AppImage_Ubuntu2404_V2.3.1.AppImage.current",
-      "retain_count": 3
+      }
     }
   ]
 }

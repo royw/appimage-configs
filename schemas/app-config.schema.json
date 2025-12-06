@@ -70,21 +70,6 @@
         },
         "checksum": {
           "$ref": "#/definitions/checksum"
-        },
-        "rotation_enabled": {
-          "type": "boolean",
-          "description": "Enable version rotation (keep old versions)",
-          "default": false
-        },
-        "symlink_path": {
-          "type": ["string", "null"],
-          "description": "Symlink path (relative, resolved against global symlink_dir)"
-        },
-        "retain_count": {
-          "type": "integer",
-          "description": "Number of old versions to keep when rotation is enabled",
-          "minimum": 0,
-          "default": 3
         }
       },
       "additionalProperties": false

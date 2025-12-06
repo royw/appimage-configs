@@ -6,7 +6,8 @@ Validations performed:
 - JSON syntax: Valid JSON parsing
 - Required fields: name, url, download_dir, pattern
 - Field types: Correct types for all fields
-- Relative paths: download_dir and symlink_path must not be absolute
+- Relative paths: download_dir must not be absolute
+- Disallowed fields: rotation_enabled, symlink_path, retain_count (set locally from global defaults)
 - Valid source types: github, gitlab, sourceforge, direct, direct_download, dynamic_download
 - Regex patterns: Valid regex syntax in pattern field
 - URL format: Must start with http:// or https://
@@ -64,14 +65,18 @@ class ConfigValidator:
         "basename": (str, type(None)),
         "enabled": bool,
         "prerelease": bool,
-        "rotation_enabled": bool,
-        "symlink_path": (str, type(None)),
-        "retain_count": int,
         "checksum": dict,
     }
 
+    # Fields that should NOT be in repo configs (set locally from global defaults)
+    DISALLOWED_FIELDS = {
+        "rotation_enabled",
+        "symlink_path",
+        "retain_count",
+    }
+
     # Fields that contain paths (must be relative)
-    PATH_FIELDS = {"download_dir", "symlink_path"}
+    PATH_FIELDS = {"download_dir"}
 
     # Valid source types (from appimage-updater handlers)
     VALID_SOURCE_TYPES = {
@@ -83,10 +88,16 @@ class ConfigValidator:
         "dynamic_download",
     }
 
-    def validate_file(self, config_path: Path) -> bool:
-        """Validate a single config file. Returns True if valid."""
+    def validate_file(self, config_path: Path, fix: bool = True) -> bool:
+        """Validate a single config file. Returns True if valid.
+        
+        Args:
+            config_path: Path to the config file
+            fix: If True, remove disallowed fields and save the file
+        """
         filename = config_path.name
         initial_error_count = len(self.errors)
+        initial_warning_count = len(self.warnings)
 
         # Check JSON syntax
         try:
@@ -98,17 +109,6 @@ class ConfigValidator:
         except OSError as e:
             self.errors.append(ValidationError(filename, f"Cannot read file: {e}"))
             return False
-
-        # Validate against JSON Schema if available
-        if self.schema and HAS_JSONSCHEMA:
-            try:
-                jsonschema.validate(config, self.schema)
-            except jsonschema.ValidationError as e:
-                # Extract the most relevant error info
-                path = ".".join(str(p) for p in e.absolute_path) if e.absolute_path else ""
-                self.errors.append(
-                    ValidationError(filename, e.message, path if path else None)
-                )
 
         # Check top-level structure
         if "applications" not in config:
@@ -129,7 +129,7 @@ class ConfigValidator:
             )
             return False
 
-        # Validate each application entry
+        # Validate each application entry (this removes disallowed fields)
         for i, app in enumerate(config["applications"]):
             self._validate_app(filename, app, i)
 
@@ -145,6 +145,23 @@ class ConfigValidator:
                         f"Filename '{config_path.name}' doesn't match app name '{app_name}'",
                         "name",
                     )
+                )
+
+        # If fields were removed and fix is enabled, save the cleaned config
+        fields_removed = len(self.warnings) > initial_warning_count
+        if fix and fields_removed and len(self.errors) == initial_error_count:
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=2)
+
+        # Validate against JSON Schema after cleaning (if available)
+        if self.schema and HAS_JSONSCHEMA:
+            try:
+                jsonschema.validate(config, self.schema)
+            except jsonschema.ValidationError as e:
+                # Extract the most relevant error info
+                path = ".".join(str(p) for p in e.absolute_path) if e.absolute_path else ""
+                self.errors.append(
+                    ValidationError(filename, e.message, path if path else None)
                 )
 
         return len(self.errors) == initial_error_count
@@ -170,6 +187,9 @@ class ConfigValidator:
                     ValidationError(filename, "Field cannot be empty", f"{prefix}.{field}")
                 )
 
+        # Check for disallowed fields (should be set locally, not in repo)
+        self._check_disallowed_fields(filename, app, prefix)
+
         # Validate field types and values
         self._validate_name(filename, app, prefix)
         self._validate_url(filename, app, prefix)
@@ -178,6 +198,26 @@ class ConfigValidator:
         self._validate_source_type(filename, app, prefix)
         self._validate_checksum(filename, app, prefix)
         self._validate_optional_types(filename, app, prefix)
+
+    def _check_disallowed_fields(self, filename: str, app: dict, prefix: str) -> None:
+        """Remove fields that should not be in repo configs.
+        
+        These fields are set locally from global defaults:
+        - rotation_enabled, retain_count: from global rotation settings
+        - symlink_path: derived from global symlink settings
+        
+        Fields are removed with a warning (not an error).
+        """
+        for field in self.DISALLOWED_FIELDS:
+            if field in app:
+                del app[field]
+                self.warnings.append(
+                    ValidationError(
+                        filename,
+                        f"Removed field '{field}' (set locally from global defaults)",
+                        f"{prefix}.{field}",
+                    )
+                )
 
     def _validate_name(self, filename: str, app: dict, prefix: str) -> None:
         """Validate app name."""

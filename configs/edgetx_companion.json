@@ -15,10 +15,7 @@
         "pattern": "{filename}-SHA256.txt",
         "algorithm": "sha256",
         "required": false
-      },
-      "rotation_enabled": true,
-      "symlink_path": "EdgeTX/EdgeTX_Companion_2.11.3-x86_64.AppImage.current",
-      "retain_count": 3
+      }
     }
   ]
 }

@@ -15,10 +15,7 @@
         "pattern": "{filename}-SHA256.txt",
         "algorithm": "sha256",
         "required": false
-      },
-      "rotation_enabled": true,
-      "symlink_path": "YubiKey/yubikey-manager-qt-latest-linux.AppImage.current",
-      "retain_count": 3
+      }
     }
   ]
 }

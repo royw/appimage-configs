@@ -15,10 +15,7 @@
         "pattern": "{filename}-SHA256.txt",
         "algorithm": "sha256",
         "required": false
-      },
-      "rotation_enabled": true,
-      "symlink_path": "GitHubDesktop/GitHubDesktop-linux-x86_64-3.4.13-linux1.AppImage.current",
-      "retain_count": 3
+      }
     }
   ]
 }
