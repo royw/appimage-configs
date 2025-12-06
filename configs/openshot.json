@@ -1,7 +1,7 @@
 {
   "applications": [
     {
-      "name": "OpenShot",
+      "name": "OpenShot2",
       "source_type": "github",
       "url": "https://github.com/openshot/openshot-qt",
       "download_dir": "OpenShot",
