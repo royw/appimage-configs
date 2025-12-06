@@ -1,0 +1,24 @@
+{
+  "applications": [
+    {
+      "name": "appimagetool",
+      "source_type": "github",
+      "url": "https://github.com/AppImage/appimagetool",
+      "download_dir": "appimagetool",
+      "pattern": "(?i)appimagetool.*\\.AppImage(\\.(|current|old))?$",
+      "version_pattern": null,
+      "basename": null,
+      "enabled": true,
+      "prerelease": false,
+      "checksum": {
+        "enabled": true,
+        "pattern": "{filename}-SHA256.txt",
+        "algorithm": "sha256",
+        "required": false
+      },
+      "rotation_enabled": true,
+      "symlink_path": "appimagetool/appimagetool-x86_64.AppImage.current",
+      "retain_count": 3
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "applications": [
+    {
+      "name": "EdgeTX_Companion",
+      "source_type": "github",
+      "url": "https://github.com/EdgeTX/edgetx",
+      "download_dir": "EdgeTX_Companion",
+      "pattern": "(?i)edgetx[-_]?firmware\\.zip.*\\.(zip|AppImage)(\\.(|current|old))?$",
+      "version_pattern": null,
+      "basename": null,
+      "enabled": true,
+      "prerelease": false,
+      "checksum": {
+        "enabled": true,
+        "pattern": "{filename}-SHA256.txt",
+        "algorithm": "sha256",
+        "required": false
+      },
+      "rotation_enabled": true,
+      "symlink_path": "EdgeTX/EdgeTX_Companion_2.11.3-x86_64.AppImage.current",
+      "retain_count": 3
+    }
+  ]
+}
