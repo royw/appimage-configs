@@ -1,0 +1,24 @@
+{
+  "applications": [
+    {
+      "name": "OpenShot",
+      "source_type": "github",
+      "url": "https://github.com/openshot/openshot-qt",
+      "download_dir": "OpenShot",
+      "pattern": "(?i)OpenShot.*\\.AppImage(\\.(|current|old))?$",
+      "version_pattern": null,
+      "basename": null,
+      "enabled": true,
+      "prerelease": false,
+      "checksum": {
+        "enabled": true,
+        "pattern": "{filename}-SHA256.txt",
+        "algorithm": "sha256",
+        "required": false
+      },
+      "rotation_enabled": true,
+      "symlink_path": "OpenShot/OpenShot-v3.3.0-x86_64.AppImage.current",
+      "retain_count": 3
+    }
+  ]
+}

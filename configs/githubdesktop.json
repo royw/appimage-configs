@@ -1,0 +1,24 @@
+{
+  "applications": [
+    {
+      "name": "GitHubDesktop",
+      "source_type": "github",
+      "url": "https://github.com/shiftkey/desktop",
+      "download_dir": "GitHubDesktop",
+      "pattern": "(?i)GitHubDesktop.*\\.AppImage(\\.(|current|old))?$",
+      "version_pattern": null,
+      "basename": null,
+      "enabled": true,
+      "prerelease": false,
+      "checksum": {
+        "enabled": true,
+        "pattern": "{filename}-SHA256.txt",
+        "algorithm": "sha256",
+        "required": false
+      },
+      "rotation_enabled": true,
+      "symlink_path": "GitHubDesktop/GitHubDesktop-linux-x86_64-3.4.13-linux1.AppImage.current",
+      "retain_count": 3
+    }
+  ]
+}

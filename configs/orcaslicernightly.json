@@ -1,0 +1,24 @@
+{
+  "applications": [
+    {
+      "name": "OrcaSlicerNightly",
+      "source_type": "github",
+      "url": "https://github.com/SoftFever/OrcaSlicer",
+      "download_dir": "OrcaSlicerNightly",
+      "pattern": "(?i)OrcaSlicer.*[Nn]ightly\\.AppImage(\\.(|current|old))?$",
+      "version_pattern": null,
+      "basename": null,
+      "enabled": true,
+      "prerelease": true,
+      "checksum": {
+        "enabled": true,
+        "pattern": "{filename}-SHA256.txt",
+        "algorithm": "sha256",
+        "required": false
+      },
+      "rotation_enabled": true,
+      "symlink_path": "OrcaSlicerNightly/OrcaSlicer_Linux_AppImage_Ubuntu2404_nightly.AppImage.current",
+      "retain_count": 3
+    }
+  ]
+}
