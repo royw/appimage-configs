@@ -24,14 +24,64 @@ appimage-updater update OrcaSlicer
 ## Repository Structure
 
 ```text
-configs/
-├── OrcaSlicer.json
-├── FreeCAD.json
-├── Inkscape.json
-└── ...
+├── configs/
+│   ├── OrcaSlicer.json
+│   ├── FreeCAD.json
+│   ├── Inkscape.json
+│   └── ...
+├── scripts/
+│   └── update_index.py
+├── .github/workflows/
+│   └── update-index.yml
+└── index.json
 ```
 
-Each `.json` file contains the configuration needed to download and update that application.
+Each `.json` file in `configs/` contains the configuration needed to download and update that application.
+
+## Index File
+
+The `index.json` file at the repository root provides a manifest of all available apps:
+
+```json
+{
+  "OrcaSlicer": ["configs/OrcaSlicer.json", "sha256:abc123..."],
+  "FreeCAD": ["configs/FreeCAD.json", "sha256:def456..."],
+  ...
+}
+```
+
+Each entry maps an app name (case-sensitive) to:
+
+- The path to its config file
+- A SHA256 hash for integrity verification
+
+The index is automatically regenerated when config files change.
+
+## Automation
+
+### `scripts/update_index.py`
+
+Regenerates `index.json` from all config files in `configs/`:
+
+```bash
+python scripts/update_index.py
+```
+
+The script:
+
+- Scans all `*.json` files in `configs/`
+- Extracts the app name from `applications[0].name` (case-sensitive)
+- Computes SHA256 hash for each config file
+- Writes `new_index.json`, then atomically swaps it with `index.json`
+
+### GitHub Actions (`.github/workflows/update-index.yml`)
+
+Automatically runs `update_index.py` when:
+
+- Any `configs/*.json` file is pushed to the `main` branch
+- Manually triggered via workflow dispatch
+
+The workflow commits the updated `index.json` back to the repository.
 
 ## Configuration Schema
 
