@@ -29,8 +29,15 @@ appimage-updater update OrcaSlicer
 │   ├── FreeCAD.json
 │   ├── Inkscape.json
 │   └── ...
+├── schemas/
+│   └── app-config.schema.json
 ├── scripts/
-│   └── update_index.py
+│   ├── update_index.py
+│   └── validate_configs.py
+├── tests/
+│   ├── run_tests.sh
+│   ├── test_validate_configs.py
+│   └── test_update_index.py
 ├── .github/workflows/
 │   └── update-index.yml
 └── index.json
@@ -44,6 +51,8 @@ The `index.json` file at the repository root provides a manifest of all availabl
 
 ```json
 {
+  "repo_hash": "sha256:...",
+  "generated_at": "2025-12-06T00:00:00Z",
   "OrcaSlicer": ["configs/OrcaSlicer.json", "sha256:abc123..."],
   "FreeCAD": ["configs/FreeCAD.json", "sha256:def456..."],
   ...
@@ -54,6 +63,11 @@ Each entry maps an app name (case-sensitive) to:
 
 - The path to its config file
 - A SHA256 hash for integrity verification
+
+Metadata fields:
+
+- `repo_hash` - Combined hash of all configs for quick change detection
+- `generated_at` - ISO timestamp of last generation
 
 The index is automatically regenerated when config files change.
 
@@ -69,10 +83,32 @@ python scripts/update_index.py
 
 The script:
 
+- Validates each config file against the JSON schema
 - Scans all `*.json` files in `configs/`
 - Extracts the app name from `applications[0].name` (case-sensitive)
 - Computes SHA256 hash for each config file
+- Generates `repo_hash` for quick change detection
 - Writes `new_index.json`, then atomically swaps it with `index.json`
+- **Fails with non-zero exit code if any validation errors occur**
+
+### `scripts/validate_configs.py`
+
+Validates all config files in `configs/`:
+
+```bash
+python scripts/validate_configs.py
+python scripts/validate_configs.py --no-schema  # Skip JSON Schema validation
+```
+
+Validation checks:
+
+- JSON syntax
+- Required fields (`name`, `url`, `pattern`, `download_dir`)
+- Relative paths (absolute paths not allowed)
+- Valid URL format
+- Valid regex patterns
+- Valid source types
+- Checksum configuration
 
 ### GitHub Actions (`.github/workflows/update-index.yml`)
 
@@ -118,14 +154,32 @@ Each config file follows this structure:
 | `checksum` | `false` | Verify checksums if available |
 | `basename` | auto | Override base filename |
 
+## Testing
+
+Run the test suite:
+
+```bash
+./tests/run_tests.sh           # Run all tests
+./tests/run_tests.sh -v        # Verbose output
+./tests/run_tests.sh -k name   # Run specific test
+./tests/run_tests.sh --cov     # With coverage
+```
+
+Tests require `pytest` and `jsonschema`:
+
+```bash
+pip install pytest pytest-cov jsonschema
+```
+
 ## Contributing
 
 To add a new application:
 
 1. Fork this repository
 2. Create `configs/AppName.json` with the required fields
-3. Test with `appimage-updater` to verify it works
-4. Submit a pull request
+3. Run `python scripts/validate_configs.py` to verify the config
+4. Test with `appimage-updater` to verify it works
+5. Submit a pull request
 
 ### Guidelines
 

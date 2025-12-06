@@ -2,6 +2,7 @@
 """Validate app configuration files in the configs/ directory.
 
 Validations performed:
+- JSON Schema: Validates against schemas/app-config.schema.json (if jsonschema installed)
 - JSON syntax: Valid JSON parsing
 - Required fields: name, url, download_dir, pattern
 - Field types: Correct types for all fields
@@ -14,12 +15,21 @@ Validations performed:
 
 Usage:
     python scripts/validate_configs.py
+    python scripts/validate_configs.py --no-schema  # Skip JSON Schema validation
 """
 
+import argparse
 import json
 import re
 import sys
 from pathlib import Path
+
+# Optional JSON Schema validation
+try:
+    import jsonschema
+    HAS_JSONSCHEMA = True
+except ImportError:
+    HAS_JSONSCHEMA = False
 
 
 class ValidationError:
@@ -41,6 +51,11 @@ class ConfigValidator:
 
     # Required fields in the application config
     REQUIRED_APP_FIELDS = {"name", "url", "download_dir", "pattern"}
+
+    def __init__(self, schema: dict | None = None):
+        self.errors: list[ValidationError] = []
+        self.warnings: list[ValidationError] = []
+        self.schema = schema
 
     # Optional fields with their expected types
     OPTIONAL_APP_FIELDS = {
@@ -68,10 +83,6 @@ class ConfigValidator:
         "dynamic_download",
     }
 
-    def __init__(self):
-        self.errors: list[ValidationError] = []
-        self.warnings: list[ValidationError] = []
-
     def validate_file(self, config_path: Path) -> bool:
         """Validate a single config file. Returns True if valid."""
         filename = config_path.name
@@ -87,6 +98,17 @@ class ConfigValidator:
         except OSError as e:
             self.errors.append(ValidationError(filename, f"Cannot read file: {e}"))
             return False
+
+        # Validate against JSON Schema if available
+        if self.schema and HAS_JSONSCHEMA:
+            try:
+                jsonschema.validate(config, self.schema)
+            except jsonschema.ValidationError as e:
+                # Extract the most relevant error info
+                path = ".".join(str(p) for p in e.absolute_path) if e.absolute_path else ""
+                self.errors.append(
+                    ValidationError(filename, e.message, path if path else None)
+                )
 
         # Check top-level structure
         if "applications" not in config:
@@ -307,13 +329,27 @@ class ConfigValidator:
                 )
 
 
-def validate_configs(configs_dir: Path) -> tuple[list[ValidationError], list[ValidationError]]:
+def load_schema(repo_root: Path) -> dict | None:
+    """Load the JSON schema if available."""
+    schema_path = repo_root / "schemas" / "app-config.schema.json"
+    if not schema_path.exists():
+        return None
+    try:
+        with open(schema_path, encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def validate_configs(
+    configs_dir: Path, schema: dict | None = None
+) -> tuple[list[ValidationError], list[ValidationError]]:
     """Validate all config files in directory.
     
     Returns:
         Tuple of (errors, warnings)
     """
-    validator = ConfigValidator()
+    validator = ConfigValidator(schema=schema)
 
     if not configs_dir.exists():
         validator.errors.append(
@@ -343,6 +379,16 @@ def validate_configs(configs_dir: Path) -> tuple[list[ValidationError], list[Val
 
 def main() -> int:
     """Main entry point."""
+    parser = argparse.ArgumentParser(
+        description="Validate app configuration files in the configs/ directory."
+    )
+    parser.add_argument(
+        "--no-schema",
+        action="store_true",
+        help="Skip JSON Schema validation",
+    )
+    args = parser.parse_args()
+
     # Determine repo root (script is in scripts/)
     script_dir = Path(__file__).resolve().parent
     repo_root = script_dir.parent
@@ -350,7 +396,16 @@ def main() -> int:
 
     print(f"Repository root: {repo_root}\n")
 
-    errors, warnings = validate_configs(configs_dir)
+    # Load schema unless disabled
+    schema = None
+    if not args.no_schema:
+        schema = load_schema(repo_root)
+        if schema and HAS_JSONSCHEMA:
+            print("Using JSON Schema validation\n")
+        elif not HAS_JSONSCHEMA:
+            print("Note: Install 'jsonschema' for schema validation\n")
+
+    errors, warnings = validate_configs(configs_dir, schema=schema)
 
     # Print warnings
     if warnings:
