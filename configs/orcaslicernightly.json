@@ -5,7 +5,7 @@
       "source_type": "github",
       "url": "https://github.com/SoftFever/OrcaSlicer",
       "download_dir": "OrcaSlicerNightly",
-      "pattern": "(?i)OrcaSlicer.*[Nn]ightly\\.AppImage(\\.(|current|old))?$",
+      "pattern": "(?i)OrcaSlicer.*[Nn]ightly.*\\.AppImage(\\.(|current|old))?$",
       "version_pattern": null,
       "basename": null,
       "enabled": true,

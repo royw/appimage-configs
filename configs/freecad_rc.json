@@ -5,7 +5,7 @@
       "source_type": "github",
       "url": "https://github.com/FreeCAD/FreeCAD",
       "download_dir": "FreeCAD_rc",
-      "pattern": "(?i)FreeCAD.*[Rr][Cc][0-9]+\\.AppImage(\\.(|current|old))?$",
+      "pattern": "(?i)FreeCAD.*[Rr][Cc][0-9]+.*\\.AppImage(\\.(|current|old))?$",
       "version_pattern": null,
       "basename": null,
       "enabled": true,

@@ -5,7 +5,7 @@
       "source_type": "github",
       "url": "https://github.com/FreeCAD/FreeCAD",
       "download_dir": "FreeCAD_weekly",
-      "pattern": "(?i)FreeCAD.*[Ww]eekly\\.AppImage(\\.(|current|old))?$",
+      "pattern": "(?i)FreeCAD.*[Ww]eekly.*\\.AppImage(\\.(|current|old))?$",
       "version_pattern": null,
       "basename": null,
       "enabled": true,

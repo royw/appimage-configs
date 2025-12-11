@@ -5,7 +5,7 @@
       "source_type": "github",
       "url": "https://github.com/SoftFever/OrcaSlicer",
       "download_dir": "OrcaSlicerRC",
-      "pattern": "(?i)OrcaSlicer.*[Rr][Cc][0-9]+\\.AppImage(\\.(|current|old))?$",
+      "pattern": "(?i)OrcaSlicer.*[Rr][Cc][0-9]+.*\\.AppImage(\\.(|current|old))?$",
       "version_pattern": null,
       "basename": null,
       "enabled": true,
