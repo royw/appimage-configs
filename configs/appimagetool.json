@@ -1,6 +1,7 @@
 {
   "applications": [
     {
+      "version": 2,
       "name": "appimagetool",
       "source_type": "github",
       "url": "https://github.com/AppImage/appimagetool",
@@ -10,12 +11,18 @@
       "basename": null,
       "enabled": true,
       "prerelease": false,
+      "symlink_enable": true,
       "checksum": {
         "enabled": true,
         "pattern": "{filename}-SHA256.txt",
         "algorithm": "sha256",
         "required": false
-      }
+      },
+      "rotation_enabled": true,
+      "symlink_path": "appimagetool.AppImage",
+      "symlink_dir": null,
+      "symlink_pattern": null,
+      "retain_count": 3
     }
   ]
 }

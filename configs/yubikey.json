@@ -1,8 +1,9 @@
 {
   "applications": [
     {
+      "version": 2,
       "name": "YubiKey",
-      "source_type": "direct_download",
+      "source_type": "direct",
       "url": "https://developers.yubico.com/yubikey-manager-qt/Releases/yubikey-manager-qt-latest-linux.AppImage",
       "download_dir": "YubiKey",
       "pattern": "(?i)yubikey[-_]?manager[-_]?qt.*\\.AppImage(\\.(|current|old))?$",
@@ -10,12 +11,18 @@
       "basename": null,
       "enabled": true,
       "prerelease": true,
+      "symlink_enable": true,
       "checksum": {
         "enabled": true,
         "pattern": "{filename}-SHA256.txt",
         "algorithm": "sha256",
         "required": false
-      }
+      },
+      "rotation_enabled": true,
+      "symlink_path": "YubiKey.AppImage",
+      "symlink_dir": null,
+      "symlink_pattern": null,
+      "retain_count": 3
     }
   ]
 }
